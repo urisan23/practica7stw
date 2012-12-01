@@ -4,28 +4,35 @@ require 'thin'
 
 set server: 'thin', connections: [], priv: {}
 
+get '/mensajes/:user' do |user|
+   erb :mensajes, locals: { user: params[:user].gsub(/\W/, '') }
+end
+get '/escritura/:user' do |user|
+   erb :escritura, locals: { user: params[:user].gsub(/\W/, '') }
+end
+get '/usuarios/:user' do |user|
+   erb :usuarios, locals: { user: params[:user].gsub(/\W/, '') }
+end
+
 get '/' do
    halt erb(:login) unless params[:user]
-   erb :chat, locals: { user: params[:user].gsub(/\W/, '') }
+   erb :chat_frames, locals: { user: params[:user].gsub(/\W/, '') }
 end
 
 get '/stream/:user', provides: 'text/event-stream' do
   stream :keep_open do |out|
     settings.connections << out
     settings.priv.store(params[:user].to_s.to_sym, out.__id__)
-    settings.connections.each { |out| out << "data: #{Time.now.strftime("%H:%M:%S")} > [#{params[:user]}] ha entrado al chat \n\n" }
+    settings.connections.each { |out| out << "data: #{Time.now.strftime("%H:%M:%S")} > [ #{params[:user]} ] ha entrado al chat \n\n" }
     out.callback{ user_to_del = out.__id__
                   settings.connections.delete(out)
-                  settings.connections.each { |channel| channel << "data: #{Time.now.strftime("%H:%M:%S")} > [#{settings.priv.key(user_to_del)}] ha salido del chat \n\n"}
+                  settings.connections.each { |channel| channel << "data: #{Time.now.strftime("%H:%M:%S")} > [ #{settings.priv.key(user_to_del)} ] ha salido del chat \n\n"}
                   settings.priv.delete(settings.priv.key(user_to_del))
                  }
-
-
   end
 end
 
 post '/' do
-
   message = params[:msg].split
   if !(message[1].to_s =~ /^\/.+:$/)
     settings.connections.each { |out| out << "data: #{Time.now.strftime("%H:%M:%S")} > #{params[:msg]}\n\n" }

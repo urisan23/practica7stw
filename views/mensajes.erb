@@ -1,0 +1,15 @@
+<html>
+   <head> 
+      <title>Super Simple Chat with Sinatra</title> 
+      <meta charset="utf-8" />
+      <script src="http://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js"></script> 
+   </head> 
+   <body>
+    <pre id='chat'></pre>
+    <script>
+       // reading
+       var es = new EventSource("/stream/<%= user %>");
+       es.onmessage = function(e) { $('#chat').append(e.data + "\n") };
+    </script>
+   </body>
+</html>

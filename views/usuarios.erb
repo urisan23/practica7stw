@@ -1,0 +1,37 @@
+<html>
+   <head> 
+      <title>Super Simple Chat with Sinatra</title> 
+      <meta charset="utf-8" />
+      <script src="http://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js"></script> 
+   </head> 
+   <body>
+    <pre id='users'></pre>
+    <script>
+       // users
+       var es = new EventSource("/stream/<%= user %>");
+       var usuarios = new Array();
+       es.onmessage = function(e) {
+         var mensaje = e.data.split(" ");
+         if (mensaje[2] == "["){
+	   //Se conecta alguien
+           if(mensaje[6] == "entrado"){
+             if (usuarios.indexOf(mensaje[3]) == -1){
+               usuarios.push(mensaje[3]);
+             }
+           }
+	   //Se desconecta alguien
+           if(mensaje[6] == "salido"){
+             if (usuarios.indexOf(mensaje[3])!=-1){
+               usuarios.splice(usuarios.indexOf(mensaje[3]),1); //lo elimino del array
+             }
+           }
+         }
+	 //Habla alguien que no estaba
+         if (!(mensaje[2] == "[") && (usuarios.indexOf(mensaje[2].replace(":",""))) == -1){
+           usuarios.push(mensaje[2].replace(":",""));  
+         }
+         document.getElementById("users").innerHTML = usuarios.toString().replace(",","\n"); ;
+       };
+    </script>
+   </body>
+</html>
