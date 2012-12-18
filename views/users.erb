@@ -1,0 +1,17 @@
+<script type="text/javascript">
+  setInterval ("self.location.reload()", 5000);
+</script>
+
+<center> 
+  <h4> 
+    <u> Usuarios conectados </u> 
+  </h4>
+</center>
+
+<% u.sort.uniq.each do |k| %>
+  <h4>
+    <center>
+      <%= k %>
+    </center>
+  </h4>
+<% end %>
